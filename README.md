@@ -10,6 +10,8 @@ To download and install this tool, please use this instruction:
 git clone https://github.com/AprilYuge/ResPAN.git
 ```
 # Brief tutorial
+This section contains the steps of applying our tool on real datasets.
+
 To run our method, the first thing is to import necessary packages:
 ```
 import awgan
@@ -42,9 +44,9 @@ sc.pp.highly_variable_genes(adata, n_top_genes=2000, batch_key='batch')
 adata = adata[:, adata.var['highly_variable']]
 
 ```
-Now we can directly load the codes of our method and run them to get output results as an AnnData file:
+Now we can directly load the codes of our method and run them to get the output results as an AnnData file:
 ```
-adata_new = sequencing_train(adata, key='batch', epoch=600, batch=1024, reduction='pca', mode='rwMNN', metric='angular', subsample=3000, filtering=False, opt='AdamW', lr=0.0001)
+adata_new = sequencing_train(adata, key='batch', epoch=300, batch=1024, reduction='pca', mode='rwMNN', metric='angular', subsample=3000, filtering=False, opt='AdamW', lr=0.0001)
 ```
 
 To visualize our results, we can use these commands:
