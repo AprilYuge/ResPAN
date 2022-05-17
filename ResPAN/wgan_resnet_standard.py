@@ -261,43 +261,7 @@ class discriminator(nn.Module):
  
  
 # WGAN generator
-# Require batch normalization
-# class generator(nn.Module):
-#     def __init__(self, N=2000):
-#         super(generator, self).__init__()
-#         self.relu_f = nn.ReLU(True)
-#         self.gen = nn.Sequential(
-#             nn.Linear(N, 1024),
-#             nn.BatchNorm1d(1024),
-#             Mish(),
-
-#             #nn.Dropout(0.5),
-#             nn.Linear(1024, 512),  
-#             nn.BatchNorm1d(512),
-#             Mish(),
-    
-
-#             nn.Linear(512, 256),  
-#             nn.BatchNorm1d(256),
-#             Mish(),
-
-
-#             nn.Linear(256, 512),  
-#             nn.BatchNorm1d(512),
-#             Mish(),
-
-#             nn.Linear(512, 1024),  
-#             nn.BatchNorm1d(1024),
-#             Mish(),
-
-#             nn.Linear(1024, N),
-#             #nn.Dropout(0.5)
-#         )
-
-#     def forward(self, x):
-#         gre = self.gen(x)
-#         return self.relu_f(gre+x)    #residual network
-    
+# Require batch normalization    
 class generator(nn.Module):
     def __init__(self, N=2000):
         super(generator, self).__init__()
@@ -362,16 +326,6 @@ def calculate_gradient_penalty(real_data, fake_data, D, center=1, p=2):
     grad_penalty = ((gradients.norm(2, dim=1) - center) ** p).mean() 
     return grad_penalty
 
-@jit(nopython = True)
-def determine_batch(val1):
-    val_list =[1024,512,256,128,64,32]
-    for i in val_list:
-        if val1%i !=1:
-            return i
-        else:
-            continue
-    return val1
-
 def weights_init_normal(m):
     classname = m.__class__.__name__
     if classname.find("Linear") != -1:
@@ -407,7 +361,6 @@ def WGAN_train(label_data, train_data, epoch, batch, lambda_1, query_data, n_cri
     G.train()
     D.train()
     
-    #batch = determine_batch(MAX_ITER)
 
     for epoch in range(epoch):
         
@@ -415,10 +368,6 @@ def WGAN_train(label_data, train_data, epoch, batch, lambda_1, query_data, n_cri
         label_data_sample = label_data[sample_index]
         train_data_sample = train_data[sample_index]
         
-#         batch = determine_batch(train_data_sample.shape[0])
-
-#         MAX_ITER = train_data_sample.shape[0]
-#         print(MAX_ITER)
 
         label_data_sample = torch.FloatTensor(label_data_sample).cuda()
         train_data_sample = torch.FloatTensor(train_data_sample).cuda()
@@ -539,105 +488,7 @@ def rpca_reduction(X, Y, n_components=20, normalization=True):
     results2.append(Y@V2[0:n_components,:].T)
     return results1, results2
 
-#NNP or MNN
-def acquire_pairs(X, Y, ref_data, query_data, mode='MNN', metric='angular', k=None, 
-                  filtering = True, k_filter=100):
-    X = preprocessing.normalize(X,axis=1)
-    Y = preprocessing.normalize(Y,axis=1)
-    t1 = KDTree(X)
-    t2 = KDTree(Y)
-    
-    ref_index = []
-    query_index = []
 
-    if mode == 'NNP':
-        # If mode is NNP find k NNPs in X for each cell in Y
-        if not k:
-            k = 1
-        sorted_mat2 = t1.query(Y,k,return_distance=False) #x index
-        for i in range(len(sorted_mat2)):
-            for j in sorted_mat2[i]:
-                ref_index.append(j)
-                query_index.append(i)
-    elif mode == 'MNN':
-        # If mode is MNN find cell pairs with one cell in X and another Y that
-        # are within each other's kNN set.
-        if not k:
-            k = int(min(X.shape[0], Y.shape[0])/200)
-        sorted_mat2 = np.array(t1.query(Y,k,return_distance=False)) #x index
-        sorted_mat1 = np.array(t2.query(X,k,return_distance=False)) #y index
-        for i in range(len(sorted_mat2)):
-            for j in sorted_mat2[i]:
-                if i in sorted_mat1[j]:
-                    ref_index.append(j)
-                    query_index.append(i)
-    else:
-        print('Mode should be either NNP or MNN.')
-    print('Number of %s pairs is %d' % (mode, len(ref_index)))
-        
-    if filtering and reduction is not None:
-        print('Start filtering of selected pairs')
-        pairs = [(x,y) for x,y in zip(ref_index, query_index)]
-        pairs = filter_pairs(ref_data, query_data, pairs, k=k_filter, reduction=reduction, 
-                             ref_reduced=X, query_reduced=Y)
-        print('Number of pairs after filtering is %d.' % len(pairs))
-        ref_index = [x for x,y in pairs]
-        query_index = [y for x,y in pairs]
-        
-    return ref_index, query_index
-
-# def acquire_pairs(X, Y, mode='MNN', metric='angular', k=None):
-    
-#     if isinstance(X, list):     
-#         f = X[0].shape[1]
-#         t1 = AnnoyIndex(f, metric)
-#         t2 = AnnoyIndex(f, metric)
-#         for i in range(len(X[0])):
-#             t1.add_item(i, X[0][i])
-#         for i in range(len(Y[1])):
-#             t2.add_item(i, Y[1][i])
-#         X = X[1]
-#         Y = Y[0]
-#     else:
-#         f = X.shape[1]
-#         t1 = AnnoyIndex(f, metric)
-#         t2 = AnnoyIndex(f, metric)
-#         for i in range(len(X)):
-#             t1.add_item(i, X[i])
-#         for i in range(len(Y)):
-#             t2.add_item(i, Y[i])
-            
-#     t1.build(10)
-#     t2.build(10)
-    
-#     ref_index = []
-#     query_index = []
-
-#     if mode == 'NNP':
-#         # If mode is NNP find k NNPs in X for each cell in Y
-#         if not k:
-#             k = 1
-#         sorted_mat2 = np.array([t1.get_nns_by_vector(item, k) for item in Y]) #x index
-#         for i in range(len(sorted_mat2)):
-#             for j in sorted_mat2[i]:
-#                 ref_index.append(j)
-#                 query_index.append(i)
-#     elif mode == 'MNN':
-#         # If mode is MNN find cell pairs with one cell in X and another Y that
-#         # are within each other's kNN set.
-#         if not k:
-#             k = int(min(X.shape[0], Y.shape[0])/200)
-#         sorted_mat2 = np.array([t1.get_nns_by_vector(item, k) for item in Y]) #x index
-#         sorted_mat1 = np.array([t2.get_nns_by_vector(item, k) for item in X]) #y index
-#         for i in range(len(sorted_mat2)):
-#             for j in sorted_mat2[i]:
-#                 if i in sorted_mat1[j]:
-#                     ref_index.append(j)
-#                     query_index.append(i)
-#     else:
-#         print('Mode should be either NNP or MNN.')
-        
-#     return ref_index, query_index
 
 def create_pairs_dict(pairs):
     pairs_dict = {}
@@ -648,28 +499,6 @@ def create_pairs_dict(pairs):
             pairs_dict[x].append(y)
     return pairs_dict
 
-# def acquire_rwmnn_pairs(X, Y, k, metric):
-#     f = X.shape[1]
-#     t1 = AnnoyIndex(f, metric)
-#     t2 = AnnoyIndex(f, metric)
-#     for i in range(len(X)):
-#         t1.add_item(i, X[i])
-#     for i in range(len(Y)):
-#         t2.add_item(i, Y[i])
-#     t1.build(10)
-#     t2.build(10)
-
-#     mnn_mat = np.bool8(np.zeros((len(X), len(Y))))
-#     sorted_mat = np.array([t2.get_nns_by_vector(item, k) for item in X])
-#     for i in range(len(sorted_mat)):
-#         mnn_mat[i,sorted_mat[i]] = True
-#     _ = np.bool8(np.zeros((len(X), len(Y))))
-#     sorted_mat = np.array([t1.get_nns_by_vector(item, k) for item in Y])
-#     for i in range(len(sorted_mat)):
-#         _[sorted_mat[i],i] = True
-#     mnn_mat = np.logical_and(_, mnn_mat)
-#     pairs = [(x, y) for x, y in zip(*np.where(mnn_mat>0))]
-#     return pairs
 
 def acquire_rwmnn_pairs(X, Y, k, metric):
     X = preprocessing.normalize(X,axis=1)
@@ -687,41 +516,6 @@ def acquire_rwmnn_pairs(X, Y, k, metric):
     mnn_mat = np.logical_and(_, mnn_mat)
     pairs = [(x, y) for x, y in zip(*np.where(mnn_mat>0))]
     return pairs
-
-# def calculate_rwmnn_pairs(X, Y, ref_data, query_data, metric='angular', k1 = None, k2 = None):
-#     tmp = np.arange(len(X))
-#     np.random.shuffle(tmp)
-#     tmp2 = np.arange(len(Y))
-#     np.random.shuffle(tmp2)
-    
-#     X = X[tmp]
-#     Y = Y[tmp2]
-#     if k2 is None:
-#         k2 = max(int(min(len(ref_data), len(query_data))/100), 1)
-#     if k1 is None:
-#         k1 = max(int(k2/2), 1)
-
-#     print('Calculating Anchor Pairs...')
-#     anchor_pairs = acquire_rwmnn_pairs(X,X, k2, metric)
-#     print('Calculating Query Pairs...')
-#     query_pairs = acquire_rwmnn_pairs(Y,Y, k2, metric)
-#     print('Calculating KNN Pairs...')
-#     pairs = acquire_rwmnn_pairs(X,Y, k1, metric)
-#     print('Number of MNN pairs is %d' % len(pairs))
-#     print('Calculating Random Walk Pairs...')
-#     anchor_pairs_dict = create_pairs_dict(anchor_pairs)
-#     query_pairs_dict = create_pairs_dict(query_pairs)
-#     pair_plus = []
-#     for x, y in pairs:
-#         start = (x, y)
-#         for i in range(50):
-#             pair_plus.append(start)
-#             start = (np.random.choice(anchor_pairs_dict[start[0]]), np.random.choice(query_pairs_dict[start[1]]))
-
-#     query_result = query_data[tmp2][[y for x,y in pair_plus], :]
-#     reference_result = ref_data[tmp][[x for x,y in pair_plus], :]
-#     print('Done.')
-#     return reference_result, query_result
 
 def top_features(X, Y, n_components=20, features_per_dim=10, normalization=True):
     mat = np.vstack([X,Y])
@@ -836,9 +630,6 @@ def training_set_generator(ref, query, reduction=None, mode='MNN', metric='angul
     if mode == 'rwMNN':
         ref_index, query_index = calculate_rwmnn_pairs(ref_reduced, query_reduced, ref, query, k1=k1, k2=k2, 
                                                        filtering=filtering)
-    else:
-        ref_index, query_index = acquire_pairs(ref_reduced, query_reduced, ref, query, mode=mode, metric=metric, 
-                                               k=k, filtering=filtering)
     print('Dimension of paired data is %d.' % len(ref_index))
         
     return ref[ref_index], query[query_index]
