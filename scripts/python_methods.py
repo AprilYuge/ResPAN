@@ -70,7 +70,7 @@ if method == 'imap':
     output_results = imap.stage2.integrate_data(adata, ec_data, k1=k1, k2=k2, seed=0)
     adata_correct = adata
     adata_correct.X = output_results
-elif method == 'wgan':
+elif method == 'respan':
     if isinstance(adata.X, scipy.sparse.csr.csr_matrix): 
         adata_new = sc.AnnData(adata.X.todense())
         adata_new.obs = adata.obs.copy()
@@ -80,48 +80,8 @@ elif method == 'wgan':
         adata_new.var_names.name = 'Gene'
         del adata
         adata = adata_new
-    from wgan_standard import sequencing_train
-    adata_correct = sequencing_train(adata, key='batch', epoch=epoch, batch=1024, k1=10, k2=20,
-                                     lambda_1=1/10, reduction='pca', mode='rwMNN', seed=0)
-elif method == 'travelwgan':
-    if isinstance(adata.X, scipy.sparse.csr.csr_matrix): 
-        adata_new = sc.AnnData(adata.X.todense())
-        adata_new.obs = adata.obs.copy()
-        adata_new.obs_names = adata.obs_names
-        adata_new.var_names = adata.var_names
-        adata_new.obs_names.name = 'CellID'
-        adata_new.var_names.name = 'Gene'
-        del adata
-        adata = adata_new
-    from travelwgan_standard import sequencing_train
-    adata_correct = sequencing_train(adata, key='batch', epoch=epoch, batch=1024, k1=10, k2=20,
-                                     lambda_1=1/10, reduction='pca', mode='rwMNN', seed=0)
-elif method == 'wgan_resnet':
-    if isinstance(adata.X, scipy.sparse.csr.csr_matrix): 
-        adata_new = sc.AnnData(adata.X.todense())
-        adata_new.obs = adata.obs.copy()
-        adata_new.obs_names = adata.obs_names
-        adata_new.var_names = adata.var_names
-        adata_new.obs_names.name = 'CellID'
-        adata_new.var_names.name = 'Gene'
-        del adata
-        adata = adata_new
-    from wgan_resnet_standard import sequencing_train
-    adata_correct = sequencing_train(adata, key='batch', epoch=epoch, batch=1024, k1=10, k2=20,
-                                     lambda_1=1/10, reduction='pca', mode='rwMNN', seed=0)
-elif method == 'travelwgan_resnet':
-    if isinstance(adata.X, scipy.sparse.csr.csr_matrix): 
-        adata_new = sc.AnnData(adata.X.todense())
-        adata_new.obs = adata.obs.copy()
-        adata_new.obs_names = adata.obs_names
-        adata_new.var_names = adata.var_names
-        adata_new.obs_names.name = 'CellID'
-        adata_new.var_names.name = 'Gene'
-        del adata
-        adata = adata_new
-    from travelwgan_resnet_standard import sequencing_train
-    adata_correct = sequencing_train(adata, key='batch', epoch=epoch, batch=1024, k1=10, k2=20,
-                                     lambda_1=1/10, reduction='pca', mode='rwMNN', seed=0)
+    from ResPAN import run_respan
+    adata_correct = run_respan(adata, batch_key='batch', epoch=300, batch=1024, reduction='pca', subsample=3000)
 elif method == 'mnn':
     import mnnpy
     temp = [adata[adata.obs['batch'] == batch] for batch in list(set(adata.obs['batch']))]
