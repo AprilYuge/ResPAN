@@ -10,7 +10,15 @@ More details about ResPAN can be found in our [manuscript](https://www.biorxiv.o
 
 ### Package requirement
 
-ResPAN is implemented in Python. Before downloading and installing ResPAN, some packages need to be installed first. To use ResPAN, PyTorch is required. Other packages required for ResPAN and their versions used in our manuscript are listed below.
+ResPAN is implemented in Python and based on the framework of PyTorch. Before downloading and installing ResPAN, some packages need to be installed first. These required packages along with their versions used in our manuscript are listed below.
+
+| Package    | Version      |
+|------------|--------------|
+| numpy      | 1.18.1       |
+| pandas     | 1.3.5        |
+| scipy      | 1.8.0        |
+| scanpy     | 1.8.2        |
+| pytorch    | 1.10.2+cu113 |
 
 ### Download 
 
@@ -43,11 +51,21 @@ sc.pp.normalize_per_cell(adata, counts_per_cell_after=1e4)
 sc.pp.log1p(adata)
 sc.pp.highly_variable_genes(adata, n_top_genes=2000, batch_key='batch')
 adata = adata[:, adata.var['highly_variable']]
+# check if data is in sparse format
+if isinstance(adata.X, scipy.sparse.csr.csr_matrix): 
+    adata_new = sc.AnnData(adata.X.todense())
+    adata_new.obs = adata.obs.copy()
+    adata_new.obs_names = adata.obs_names
+    adata_new.var_names = adata.var_names
+    adata_new.obs_names.name = 'CellID'
+    adata_new.var_names.name = 'Gene'
+    del adata
+    adata = adata_new
 ```
 
 Now we can run ResPAN on the preprocessed data for batch correction. The output result is an AnnData object:
 ```
-adata_new = run_respan(adata, batch_key='batch', epoch=300, batch=1024, reduction='pca', subsample=3000)
+adata_new = run_respan(adata, batch_key='batch', epoch=300, batch=1024, reduction='pca', subsample=3000, seed=999)
 ```
 As indicated in our manuscipt, we use PCA for dimensionality reduction, kPCA (`reduction='kpca'`) and CCA (`reduction='cca'`) are also implemented, but their performance were not as good as PCA. Meanwhile, we subsampled cells in each batch to 3,000 before finding random walk MNN pairs [1].
 
@@ -60,11 +78,11 @@ sc.set_figure_params(figsize=(5,5),fontsize=12)
 sc.pl.umap(adata_new, color=['batch', 'celltype'], frameon=False, show=False)
 ```
 
-### Code referencew
+### Code references
 
 For the implementation of ResPAN, we referred to [WGAN-GP](https://github.com/Zeleni9/pytorch-wgan) for the structure of Generative Adversarial Network and [iMAP](https://github.com/Svvord/iMAP) for the random walk mutual nearest neighbor method. Many thanks to their open-source treasure.
 
-# Citations
+### Paper references
 [1] Wang, Dongfang, et al. "iMAP: integration of multiple single-cell datasets by adversarial paired transfer networks." Genome biology 22.1 (2021): 1-24.
 
 
