@@ -1,8 +1,8 @@
-# ResPAN: a light structured **Res**idual autoencoder and mutual nearest neighbor **P**aring guided **A**dversarial **N**etwork for scRNA-seq batch correction
+# ResPAN
 
 This reporsity contains code and information of data used in the paper “*ResPAN: a powerful batch correction model for scRNA-seq data through residual adversarial networks*”. Source code for ResPAN are in the [ResPAN](https://github.com/AprilYuge/ResPAN/tree/main/ResPAN) folder, scipts for reproducing benchmarking results are in the [scripts](https://github.com/AprilYuge/ResPAN/tree/main/scripts) folder, and data information can be found in the [data](https://github.com/AprilYuge/ResPAN/tree/main/data) folder.
 
-The workflow of ResPAN contains three key steps: generation of training data, adversarial training of the neural network, and generation of corrected data without batch effect. A figure summary is shown below.
+ResPAN is a light structured **Res**idual autoencoder and mutual nearest neighbor **P**aring guided **A**dversarial **N**etwork for scRNA-seq batch correction. The workflow of ResPAN contains three key steps: generation of training data, adversarial training of the neural network, and generation of corrected data without batch effect. A figure summary is shown below.
 
 ![alt text](https://github.com/AprilYuge/ResPAN/blob/main/images/workflow.png).
 
