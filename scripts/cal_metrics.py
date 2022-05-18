@@ -6,15 +6,14 @@ from metrics import calculate_metrics
 import scipy
 import re
 
-# datanames = ['CL', 'DC', 'Pancrm', 'PBMC368k', 'HumanPBMC', 'MHSP', 'MCA', 'Lung', 'MouseRetina', 'HCA', 'MouseBrain']
-# methods = ['raw', 'imap', 'mnn', 'scvi', 'harmony', 'bbknn', 'liger', 'seurat']
+# datanames = ['CL', 'Pancrm', 'PBMC368k', 'HumanPBMC', 'MHSP', 'MCA', 'Lung', 'MouseRetina', 'HCA', 'MouseBrain']
+# methods = ['raw', 'respan', 'imap', 'mnn', 'scvi', 'harmony', 'liger', 'seurat']
 
 dataname = str(sys.argv[1]) 
 method = str(sys.argv[2])
 if bool(re.match('Sim[0-9]*.', dataname)):
     folder = str(sys.argv[3])
 elif len(sys.argv) == 3+1:
-# elif dataname == 'HCA' or dataname == 'MouseBrain':
     seed = int(sys.argv[3])
 
 npcs = 20
@@ -100,12 +99,6 @@ if 'X_pca' not in adata_raw.obsm.keys():
         adata_raw.obsm['X_pca'] = np.load('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_raw_20pc.npy' % (dataname, dataname))
     except:
         sc.tl.pca(adata_raw, 20, svd_solver='arpack')
-#     adata_new = sc.AnnData(adata_raw.obsm['X_pca'])
-#     adata_new.obsm['X_pca'] = adata_raw.obsm['X_pca']
-#     adata_new.obs = adata_raw.obs.copy()
-#     del adata_raw
-#     adata = adata_new
-#     adata_raw = adata_new
     
 DEGpath = None
 if dataname == 'HCA':

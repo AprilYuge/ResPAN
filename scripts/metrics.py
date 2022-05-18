@@ -323,9 +323,6 @@ def positive_true_positive(adata, batch_key='batch', celltype_key='celltype', us
         else:
             tp_list.append(False)
 
-#     adata.obs['evaluation'] = 'Others'
-#     adata.obs['evaluation'][np.array(p_list) == False] = 'Negative cells'
-#     adata.obs['evaluation'][np.array(tp_list)] = 'True positive cells'
     pos_rate = sum(p_list)/len(p_list)
     truepos_rate = sum(tp_list)/len(tp_list)
     return pos_rate, truepos_rate
@@ -499,10 +496,6 @@ def calculate_metrics(adata, adata_raw, batch_key='batch', celltype_key='celltyp
         elif is_embed:
             exp_sim = np.nan
         else:
-#             idx_logic = adata_raw.var_names.isin(adata.var_names)
-#             adata_raw = adata_raw[:, adata.var_names]
-#             sc.tl.pca(adata_raw, 20, svd_solver='arpack')
-#             adata_raw.X = adata_raw.raw.X[:, idx_logic].copy()
             adata_raw.X = adata_raw.raw.X.copy()
             adata_raw = adata_raw[:, adata.var_names].copy()
             adata.X = adata.raw.X.copy()
@@ -621,10 +614,6 @@ def calculate_metrics(adata, adata_raw, batch_key='batch', celltype_key='celltyp
         elif is_embed:
             exp_sim = np.nan
         else:
-#             idx_logic = adata_raw.var_names.isin(adata.var_names)
-#             adata_raw = adata_raw[:, adata.var_names]
-#             sc.tl.pca(adata_raw, 20, svd_solver='arpack')
-#             adata_raw.X = adata_raw.raw.X[:, idx_logic].copy()
             adata_raw.X = adata_raw.raw.X.copy()
             adata_raw = adata_raw[:, adata.var_names].copy()
             adata.X = adata.raw.X.copy()

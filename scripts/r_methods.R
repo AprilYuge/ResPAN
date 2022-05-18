@@ -6,9 +6,11 @@ library(rliger)
 # Parameters
 npcs = 20
 args = commandArgs(trailingOnly=TRUE)
-dataname = args[1] # ['CL', 'DC', 'Panc', 'PBMC368k', 'HumanPBMC', 'MHSP', 'MCA', 'Lung', 'MouseRetina', 'HCA', 'MouseBrain']
+dataname = args[1] # ['CL', 'Panc', 'PBMC368k', 'HumanPBMC', 'MHSP', 'MCA', 'Lung', 'MouseRetina', 'HCA', 'MouseBrain']
 method = args[2] # ['liger', 'seurat']
-folder = args[3]
+if (length(args) > 2){
+    folder = args[3]
+}
 
 chunk <- function(x,n){
     vect <- c(1:x)
@@ -17,24 +19,26 @@ chunk <- function(x,n){
 }
 
 # Load data
-# if (dataname == 'HCA'){
-#     filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/', dataname, '/', dataname, '_raw.h5seurat')
-#     data = LoadH5Seurat(filepath)
-#     data@meta.data$batch <- as.character(data@meta.data$batch)
-#     if ('celltype' %in% colnames(data@meta.data)){
-#         data@meta.data$cell_type <- as.character(data@meta.data$cell_type)
-#     }
-# } else{
-#     filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/', dataname, '/', dataname, '_raw.loom')
-#     data <- LoadLoom(filepath, mode='r')
-# }
-
-if (folder == 'baseline'){
-    filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', dataname, '_raw.loom')
-    data <- LoadLoom(filepath, mode='r')
-} else{
-    filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', folder, '/', dataname, '_raw.loom')
-    data <- LoadLoom(filepath, mode='r')
+if (exists("folder")){ 
+    if (folder == 'baseline'){
+        filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', dataname, '_raw.loom')
+        data <- LoadLoom(filepath, mode='r')
+    } else{
+        filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', folder, '/', dataname, '_raw.loom')
+        data <- LoadLoom(filepath, mode='r')
+    }
+}else{
+    if (dataname == 'HCA'){
+        filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/', dataname, '/', dataname, '_raw.h5seurat')
+        data = LoadH5Seurat(filepath)
+        data@meta.data$batch <- as.character(data@meta.data$batch)
+        if ('celltype' %in% colnames(data@meta.data)){
+            data@meta.data$cell_type <- as.character(data@meta.data$cell_type)
+        }
+    } else{
+        filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/', dataname, '/', dataname, '_raw.loom')
+        data <- LoadLoom(filepath, mode='r')
+    }
 }
 
 if (dataname == 'HCA' | dataname == 'MouseBrain'){
@@ -107,11 +111,14 @@ time_elapse <- as.numeric(difftime(end, start, units = "secs"))
 print(paste0('Running time on ', dataname, ' for ', method, ' is ', time_elapse, ' sec.'))
 
 # Save results
-# savepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/', dataname, '/', dataname, '_', method, '.loom')
-if (folder == 'baseline'){
-    savepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', dataname, '_', method, '.loom')
-} else{
-    savepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', folder, '/', dataname, '_', method, '.loom')
+if (exists("folder")){ 
+    if (folder == 'baseline'){
+        savepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', dataname, '_', method, '.loom')
+    } else{
+        savepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', folder, '/', dataname, '_', method, '.loom')
+    }
+}else{
+    savepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/', dataname, '/', dataname, '_', method, '.loom')
 }
 cl.loom <- as.loom(data_correct, filename = savepath, verbose = FALSE)
 cl.loom$close_all()
