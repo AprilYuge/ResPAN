@@ -20,7 +20,6 @@ Python and R packages required for running our benchmarking piepline are listed 
 |                 | harmonypy     | 0.0.6      |
 |                 | scikit-learn  | 1.0.2      |
 |                 | rpy2          | 3.4.5      |
-|-----------------|---------------|------------|
 | R packages      | kBET          | 0.99.6     |
 |                 | lisi          | 1.0.0      |
 |                 | rliger        | 1.0.0      |
