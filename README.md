@@ -71,6 +71,8 @@ As indicated in our manuscipt, we use PCA for dimensionality reduction, kPCA (`r
 
 To visualize our results, we can use the following commands:
 ```
+adata_new.raw = adata_new
+sc.pp.scale(adata_new, max_value=10)
 sc.tl.pca(adata_new, 20, svd_solver='arpack')
 sc.pp.neighbors(adata_new)
 sc.tl.umap(adata_new)
