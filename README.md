@@ -20,12 +20,19 @@ ResPAN is implemented in Python and based on the framework of PyTorch. Before do
 | scanpy     | 1.8.2        |
 | pytorch    | 1.10.2+cu113 |
 
-### Download 
+### Installation
 
-To download and install ResPAN, please copy and paste the following line to your terminal:
+There are two ways to install and use ResPAN, the first and easiest way is to use pip install:
+```
+pip install ResPAN
+```
+
+If it doesn't work, you can also make a clone of this GitHub repository:
 ```
 git clone https://github.com/AprilYuge/ResPAN.git
 ```
+
+A callable function `run_respan` is in ResPAN/respan.py.
 
 ### Brief tutorial
 
