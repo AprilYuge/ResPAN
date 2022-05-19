@@ -23,17 +23,17 @@ if 'folder' in locals():
     else:
         epoch = 300
     if folder == 'baseline':
-        adata = sc.read_loom('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s_raw.loom' % (dataname, dataname), 
+        adata = sc.read_loom('../data/Sim/%s/%s_raw.loom' % (dataname, dataname), 
                              sparse=False)  #Load cell line dataset(-> count data). 
     else:
-        adata = sc.read_loom('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s/%s_raw.loom' % (dataname, folder, dataname), 
+        adata = sc.read_loom('../data/Sim/%s/%s/%s_raw.loom' % (dataname, folder, dataname), 
                              sparse=False)  #Load cell line dataset(-> count data). 
 else:
     # Read data and preprocess
     if dataname == 'HCA' or dataname == 'MouseBrain':
-        adata = sc.read_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_raw.h5ad' % (dataname, dataname))
+        adata = sc.read_h5ad('../data/%s/%s_raw.h5ad' % (dataname, dataname))
     else:
-        adata = sc.read_loom('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_raw.loom' % (dataname, dataname), 
+        adata = sc.read_loom('../data/%s/%s_raw.loom' % (dataname, dataname), 
                              sparse=False)  #Load cell line dataset(-> count data). 
   
 start = time.time()
@@ -118,11 +118,11 @@ else:
 
 if 'folder' in locals():
     if folder == 'baseline':
-        adata_correct.write_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s_%s.h5ad' % (dataname, dataname, method))
+        adata_correct.write_h5ad('../data/Sim/%s/%s_%s.h5ad' % (dataname, dataname, method))
     else:
-        adata_correct.write_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s/%s_%s.h5ad' % (dataname, folder, 
+        adata_correct.write_h5ad('../data/Sim/%s/%s/%s_%s.h5ad' % (dataname, folder, 
                                                                                                     dataname, method)) 
 elif 'seed' in locals():
-    adata_correct.write_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s-seed%d.h5ad' % (dataname, dataname, method, seed))
+    adata_correct.write_h5ad('../data/%s/%s_%s-seed%d.h5ad' % (dataname, dataname, method, seed))
 else:
-    adata_correct.write_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s.h5ad' % (dataname, dataname, method))
+    adata_correct.write_h5ad('../data/%s/%s_%s.h5ad' % (dataname, dataname, method))

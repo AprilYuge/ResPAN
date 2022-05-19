@@ -21,22 +21,22 @@ chunk <- function(x,n){
 # Load data
 if (exists("folder")){ 
     if (folder == 'baseline'){
-        filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', dataname, '_raw.loom')
+        filepath <- paste0('../data/Sim/', dataname, '/', dataname, '_raw.loom')
         data <- LoadLoom(filepath, mode='r')
     } else{
-        filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', folder, '/', dataname, '_raw.loom')
+        filepath <- paste0('../data/Sim/', dataname, '/', folder, '/', dataname, '_raw.loom')
         data <- LoadLoom(filepath, mode='r')
     }
 }else{
     if (dataname == 'HCA'){
-        filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/', dataname, '/', dataname, '_raw.h5seurat')
+        filepath <- paste0('../data/', dataname, '/', dataname, '_raw.h5seurat')
         data = LoadH5Seurat(filepath)
         data@meta.data$batch <- as.character(data@meta.data$batch)
         if ('celltype' %in% colnames(data@meta.data)){
             data@meta.data$cell_type <- as.character(data@meta.data$cell_type)
         }
     } else{
-        filepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/', dataname, '/', dataname, '_raw.loom')
+        filepath <- paste0('../data/', dataname, '/', dataname, '_raw.loom')
         data <- LoadLoom(filepath, mode='r')
     }
 }
@@ -113,12 +113,12 @@ print(paste0('Running time on ', dataname, ' for ', method, ' is ', time_elapse,
 # Save results
 if (exists("folder")){ 
     if (folder == 'baseline'){
-        savepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', dataname, '_', method, '.loom')
+        savepath <- paste0('../data/Sim/', dataname, '/', dataname, '_', method, '.loom')
     } else{
-        savepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/', dataname, '/', folder, '/', dataname, '_', method, '.loom')
+        savepath <- paste0('../data/Sim/', dataname, '/', folder, '/', dataname, '_', method, '.loom')
     }
 }else{
-    savepath <- paste0('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/', dataname, '/', dataname, '_', method, '.loom')
+    savepath <- paste0('../data/', dataname, '/', dataname, '_', method, '.loom')
 }
 cl.loom <- as.loom(data_correct, filename = savepath, verbose = FALSE)
 cl.loom$close_all()

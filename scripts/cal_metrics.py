@@ -32,16 +32,16 @@ else:
 # Read in raw data
 if 'folder' in locals():
     if folder == 'baseline':
-        adata_raw = sc.read_loom('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s_raw.loom' % (dataname, dataname), 
+        adata_raw = sc.read_loom('../data/Sim/%s/%s_raw.loom' % (dataname, dataname), 
                              sparse=False)  #Load cell line dataset(-> count data). 
     else:
-        adata_raw = sc.read_loom('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s/%s_raw.loom' % (dataname, folder, dataname), 
+        adata_raw = sc.read_loom('../data/Sim/%s/%s/%s_raw.loom' % (dataname, folder, dataname), 
                              sparse=False)  #Load cell line dataset(-> count data). 
 else:
     if dataname == 'HCA' or dataname == 'MouseBrain':
-        adata_raw = sc.read_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_raw.h5ad' % (dataname, dataname))
+        adata_raw = sc.read_h5ad('../data/%s/%s_raw.h5ad' % (dataname, dataname))
     else:
-        adata_raw = sc.read_loom('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_raw.loom' % (dataname, dataname), 
+        adata_raw = sc.read_loom('../data/%s/%s_raw.loom' % (dataname, dataname), 
                              sparse=False)  #Load cell line dataset(-> count data). 
 # sc.pp.filter_cells(adata_raw, min_genes=200)
 # sc.pp.filter_genes(adata_raw, min_cells=3)
@@ -61,13 +61,13 @@ if method == 'raw':
 else:
     if 'folder' in locals():
         if folder == 'baseline':
-            adata = sc.read_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s_%s.h5ad' % (dataname, dataname, method))
+            adata = sc.read_h5ad('../data/Sim/%s/%s_%s.h5ad' % (dataname, dataname, method))
         else:
-            adata = sc.read_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s/%s_%s.h5ad' % (dataname, folder, dataname, method))
-    elif method == 'seurat' or method == 'mnn':
-        adata = sc.read_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s.h5ad' % (dataname, dataname, method))
+            adata = sc.read_h5ad('../data/%s/%s/%s_%s.h5ad' % (dataname, folder, dataname, method))
+    elif method == 'respan' or method == 'scvi' or method == 'imap':
+        adata = sc.read_h5ad('../data/%s/%s_%s-seed%d.h5ad' % (dataname, dataname, method, seed))
     else:
-        adata = sc.read_h5ad('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s-seed%d.h5ad' % (dataname, dataname, method, seed))
+        adata = sc.read_h5ad('../data/%s/%s_%s.h5ad' % (dataname, dataname, method))
     if method == 'mnn':
         adata.obs_names = ['-'.join(g.split('-')[:-1]) for g in adata.obs_names]
     if method in ['scvi', 'harmony']:
@@ -96,40 +96,40 @@ if 'X_pca' not in adata.obsm.keys():
 
 if 'X_pca' not in adata_raw.obsm.keys():
     try:
-        adata_raw.obsm['X_pca'] = np.load('/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_raw_20pc.npy' % (dataname, dataname))
+        adata_raw.obsm['X_pca'] = np.load('../data/%s/%s_raw_20pc.npy' % (dataname, dataname))
     except:
         sc.tl.pca(adata_raw, 20, svd_solver='arpack')
     
 DEGpath = None
 if dataname == 'HCA':
-    if method == 'seurat' or method == 'mnn':
-        savepath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s_%d_metrics.csv' % (dataname, dataname, method, seed)
+    if method == 'respan' or method == 'scvi' or method == 'imap':
+        savepath = '../data/%s/%s_%s-seed%d_%d_metrics.csv' % (dataname, dataname, method, seed, seed)
     else:
-        savepath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s-seed%d_%d_metrics.csv' % (dataname, dataname, method, seed, seed)
+        savepath = '../data/%s/%s_%s_%d_metrics.csv' % (dataname, dataname, method, seed)   
     calculate_metrics(adata, adata_raw=adata_raw, celltype_key=None, savepath=savepath, is_raw=is_raw, is_embed=is_embed,
                       embed=embed, is_simul=is_simul, org=org, dataname=dataname, subsample=0.1, seed=seed)
 elif dataname == 'MouseBrain':
-    if method == 'seurat' or method == 'mnn':
-        savepath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s_%d_metrics.csv' % (dataname, dataname, method, seed)
+    if method == 'respan' or method == 'scvi' or method == 'imap':
+        savepath = '../data/%s/%s_%s-seed%d_%d_metrics.csv' % (dataname, dataname, method, seed, seed)
     else:
-        savepath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s-seed%d_%d_metrics.csv' % (dataname, dataname, method, seed, seed)
+        savepath = '../data/%s/%s_%s_%d_metrics.csv' % (dataname, dataname, method, seed)
     calculate_metrics(adata, adata_raw=adata_raw, savepath=savepath, is_raw=is_raw, is_embed=is_embed, embed=embed,
                       is_simul=is_simul, org=org, dataname=dataname, subsample=0.1, seed=seed)
 elif 'folder' in locals():
     if folder == 'baseline':
-        savepath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s_%s_metrics.csv' % (dataname, dataname, method)
+        savepath = '../data/Sim/%s/%s_%s_metrics.csv' % (dataname, dataname, method)
     else:
-        savepath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/%s/%s_%s_metrics.csv' % (dataname, folder, dataname, method)
-    DEGpath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/Sim/%s/geneinfo.txt' % (dataname)
+        savepath = '../data/Sim/%s/%s/%s_%s_metrics.csv' % (dataname, folder, dataname, method)
+    DEGpath = '../data/Sim/%s/geneinfo.txt' % (dataname)
     calculate_metrics(adata, adata_raw=adata_raw, savepath=savepath, is_raw=is_raw, is_embed=is_embed, embed=embed,
                       is_simul=is_simul, org=org, dataname=dataname, DEGpath=DEGpath)
 else:
-    if method == 'seurat' or method == 'mnn':
-        savepath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s_metrics.csv' % (dataname, dataname, method)
+    if method == 'respan' or method == 'scvi' or method == 'imap':
+        savepath = '../data/%s/%s_%s-seed%d_metrics.csv' % (dataname, dataname, method, seed)
     else:
-        savepath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/%s_%s-seed%d_metrics.csv' % (dataname, dataname, method, seed)
+        savepath = '../data/%s/%s_%s_metrics.csv' % (dataname, dataname, method)
     if is_simul:
-        DEGpath = '/gpfs/gibbs/pi/zhao/yw599/AWGAN/datasets/%s/geneinfo.txt' % (dataname)
+        DEGpath = '../data/%s/geneinfo.txt' % (dataname)
     calculate_metrics(adata, adata_raw=adata_raw, savepath=savepath, is_raw=is_raw, is_embed=is_embed, embed=embed,
                       is_simul=is_simul, org=org, dataname=dataname, DEGpath=DEGpath)
 
