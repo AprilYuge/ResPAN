@@ -5,6 +5,7 @@ import sklearn.preprocessing as preprocessing
 from sklearn.neighbors import KDTree
 
 import torch.autograd
+import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
@@ -319,7 +320,7 @@ def calculate_rwmnn_pairs(X, Y, ref_data, query_data, k1 = None, k2 = None,
     return ref_index, query_index
 
 def training_set_generator(ref, query, reduction=None, subsample=None,
-                           k=None, k1=None, k2=None, norm=True, filtering=False):
+                           k1=None, k2=None, norm=True, filtering=False):
     ref_reduced, query_reduced = None, None
     if subsample:
         len_ref = len(ref)
@@ -386,7 +387,7 @@ def run_respan(adata, batch_key='batch', order=None, epoch=300, batch=1024, lamb
         print("########################## Mapping %s to the reference data #####################"%(bat))
         batch_data_ori = adata[adata.obs['batch'] == bat].X
         label_data, train_data = training_set_generator(ref_data_ori, batch_data_ori, reduction=reduction,
-                                                        subsample=subsample, k=k, k1=k1, k2=k2, filtering=filtering)
+                                                        subsample=subsample, k1=k1, k2=k2, filtering=filtering)
         print("######################## Finish pair finding ########################")
         remove_batch_data, G_tar = train(label_data, train_data, epoch, batch, lambda_1, batch_data_ori,
                                          n_critic=n_critic, b1=b1, b2=b2, lr=lr, opt=opt)
