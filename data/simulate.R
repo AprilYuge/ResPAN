@@ -1,7 +1,7 @@
 library(splatter)
 
 base_params <- newSplatParams(
-#                         nGenes = 2000,
+                        nGenes = 10000,
                         mean.shape = 0.34,
                         mean.rate = 7.68,
                         lib.loc = 7.64,
@@ -23,7 +23,7 @@ for (seed in 1:10){
         group.prob     = rep(1, 7) / 7,
         # Differential expression by group
         de.prob        = c(0.10, 0.12, 0.08, 0.20, 0.12, 0.10, 0.16),
-        de.facLoc      = rep(0.5, 7),
+        de.facLoc      = c(0.10, 0.08, 0.12, 0.18, 0.06, 0.20, 0.14),
         de.facScale    = rep(1.0, 7),
         # Seed
         seed           = seed,
