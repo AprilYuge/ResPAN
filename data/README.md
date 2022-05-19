@@ -16,6 +16,6 @@ The sources of these datasets can be found in `STable3.xlsx` and the cell type c
 
 
 ### References
-[1] Zappia, Luke, Belinda Phipson, and Alicia Oshlack. "Splatter: simulation of single-cell RNA sequencing data." Genome biology 18.1 (2017): 1-15.
-[2] Kotliar, Dylan, et al. "Identifying gene expression programs of cell-type identity and cellular activity with single-cell RNA-Seq." Elife 8 (2019): e43803.
-[3] Quadrato, Giorgia, et al. "Cell diversity and network dynamics in photosensitive human brain organoids." Nature 545.7652 (2017): 48-53.
+* [1] Zappia, Luke, Belinda Phipson, and Alicia Oshlack. "Splatter: simulation of single-cell RNA sequencing data." Genome biology 18.1 (2017): 1-15.
+* [2] Kotliar, Dylan, et al. "Identifying gene expression programs of cell-type identity and cellular activity with single-cell RNA-Seq." Elife 8 (2019): e43803.
+* [3] Quadrato, Giorgia, et al. "Cell diversity and network dynamics in photosensitive human brain organoids." Nature 545.7652 (2017): 48-53.
