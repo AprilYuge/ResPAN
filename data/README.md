@@ -6,7 +6,7 @@ This folder contains detailed information of sources for the 11 real datasets an
 
 For the simulation study, we generated synthetic scRNA-seq data using Splatter [1], which is based on negative binomial distributions through a hierarchical Gamma-Poisson model. Parameters were the same as those used in Kotliar et al. [2], which were estimated by Splatter from 8,000 cells of the organoid dataset in Quadrato et al. [3]. We simulated two batches and seven cell types. The number of cells in each batch was 2,000, and the number of genes was 10,000. Ten baseline datasets with balanced settings using different seeds were first simulated. Then, we considered three general scenarios, which were unbalanced batch size (scenario 1), rare cell types (scenario 2), and batch-specific cell types (scenario 3). For each scenario, we further considered three sub-levels. For scenario 1, cells in batch 1 were downsampled to 50% (batch1-0.5), 25% (batch1-0.25), and 12.5% (batch1-0.125); for scenario 2, cells labeled as Group1 in each batch were downsampled to 50% (rare1-0.5), 20% (rare1-0.2), and 10% (rare1-0.1); for scenario 3, the number of common cell types were reduced to five (common-5), three (common-3), and one (common-1) separately. Therefore, nine other datasets were generated based on each baseline dataset, and there were in total 10 sub-scenarios, and each of them contained 10 random repeats.
 
-Code for generating all simulated data can be found in `simulate.py`.
+Code for generating all simulated data can be found in `simulate.R`.
 
 ### Real data
 
