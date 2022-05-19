@@ -4,7 +4,7 @@ This reporsity contains code and information of data used in the paper “*ResPA
 
 ResPAN is a light structured **Res**idual autoencoder and mutual nearest neighbor **P**aring guided **A**dversarial **N**etwork for scRNA-seq batch correction. The workflow of ResPAN contains three key steps: generation of training data, adversarial training of the neural network, and generation of corrected data without batch effect. A figure summary is shown below.
 
-![alt text](https://github.com/AprilYuge/ResPAN/blob/main/images/workflow.png).
+![alt text](https://github.com/AprilYuge/ResPAN/blob/main/images/workflow.png)
 
 More details about ResPAN can be found in our [manuscript](https://www.biorxiv.org/content/10.1101/2021.11.08.467781v3.full).
 
