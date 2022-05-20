@@ -6,7 +6,7 @@ ResPAN is a light structured **Res**idual autoencoder and mutual nearest neighbo
 
 ![alt text](https://github.com/AprilYuge/ResPAN/blob/main/images/workflow.png)
 
-More details about ResPAN can be found in our [manuscript](https://www.biorxiv.org/content/10.1101/2021.11.08.467781v3.full).
+More details about ResPAN can be found in our [manuscript](https://www.biorxiv.org/content/10.1101/2021.11.08.467781v4).
 
 ### Package requirement
 
