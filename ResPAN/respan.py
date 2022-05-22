@@ -12,6 +12,8 @@ from torch.utils.data import DataLoader
 import torch.utils.data as data_utils
 
 class Mish(nn.Module):
+    """A class implementation for the state-of-the-art activation function, Mish.
+    """
     def __init__(self):
         super().__init__()
 
@@ -20,6 +22,9 @@ class Mish(nn.Module):
 
 # The discriminator model, and it does not need to use bath normalization based on WGAN-GP paper.
 class discriminator(nn.Module):
+    """The discrimimator structure of our AWGAN. 
+        Layer: N(2000)->1024->512->256->128->1
+    """
     def __init__(self, N = 2000):
         super(discriminator, self).__init__()
         self.dis = nn.Sequential(
@@ -41,6 +46,10 @@ class discriminator(nn.Module):
  
 # The generator model that requires batch normalization    
 class generator(nn.Module):
+    """The generator structure of our AWGAN. 
+    Layer: 2000->1024->512->256->512->1024->2000
+    with skip connection
+    """
     def __init__(self, N=2000):
         super(generator, self).__init__()
         self.relu_f = nn.ReLU(True)
@@ -79,6 +88,16 @@ class generator(nn.Module):
 
 # calculate gradient penalty
 def calculate_gradient_penalty(real_data, fake_data, D, center=1, p=2): 
+    """Function utilized to calculate gradient penalty. This term is used to construct the loss function. 
+    Args:
+       real_data: Tensor of reference (new reference) batch data
+       fake_data: Tensor of query batch data
+       D: The discriminator network 
+       center: K of Lipschitz condition 
+       p: Dimensions of distance 
+    Output:
+        result(list): A list containing index pair for NNPs.
+    """
     eta = torch.FloatTensor(real_data.size(0),1).uniform_(0,1) 
     eta = eta.expand(real_data.size(0), real_data.size(1)) 
     cuda = True if torch.cuda.is_available() else False 
@@ -106,7 +125,22 @@ def calculate_gradient_penalty(real_data, fake_data, D, center=1, p=2):
 
 def train(label_data, train_data, epoch, batch, lambda_1, query_data, n_critic=100, 
           b1=0.5, b2=0.9, lr=0.0001, opt='AdamW'):
-
+    """Function utilized to train ResPAN
+        Args:
+            label_data: Tensor of reference (new reference) batch data
+            train_data: Tensor of query batch data
+            epoch: The number of iteraiton steps
+            batch: Input batch 
+            lambda_1: A hyperparameter used to control the weights of gradient penalty
+            query_data: Gene level expression matrix of another batch
+            n_critic: A step value used to determine the training times of generator 
+            b1,b2: Hyperparameters used in AdamW optimizer
+            lr: Learning rate
+            opt: The name of our optimizer
+        Output:
+            test_list: Results for query batch after batch correction
+            G: The generator of ResPAN
+    """
     D = discriminator(N=2000)
     G = generator(N=2000)
 
@@ -179,6 +213,16 @@ def train(label_data, train_data, epoch, batch, lambda_1, query_data, n_critic=1
 # dimensional reduction tools
 from sklearn import preprocessing
 def cca_seurat(X, Y, n_components=20, normalization=True):
+    """Function used to perform dimension reduction based on CCA.
+        Args:
+            X: Gene expression matrix of the reference batch
+            Y: Gene expression matrix of the query batch
+            n_components: The components we intend to preserve after dimension reduction
+            normalization: A bool value used to determine whether to scale the data or not
+        Output:
+            W1: Embeddings of the reference data
+            W2: Embeddings of the query data
+    """
     if normalization:
         X = preprocessing.scale(X, axis=0)
         Y = preprocessing.scale(Y, axis=0)
@@ -188,29 +232,68 @@ def cca_seurat(X, Y, n_components=20, normalization=True):
     k = n_components
     u,sig,v = np.linalg.svd(mat,full_matrices=False)
     sigma = np.diag(sig)
-    return np.dot(u[:,:k],np.sqrt(sigma[:k,:k])), np.dot(v.T[:,:k], np.sqrt(sigma[:k,:k]))
+    W1 = np.dot(u[:,:k],np.sqrt(sigma[:k,:k]))
+    W2 = np.dot(v.T[:,:k], np.sqrt(sigma[:k,:k]))
+    return W1, W2
 
 from sklearn.decomposition import PCA
 def pca_reduction(X, Y, n_components=20, normalization=True):
+    """Function used to perform dimension reduction based on PCA.
+        Args:
+            X: Gene expression matrix of the reference batch
+            Y: Gene expression matrix of the query batch
+            n_components: The components we intend to preserve after dimension reduction
+            normalization: A bool value used to determine whether to scale the data or not
+        Output:
+            W1: Embeddings of the reference data
+            W2: Embeddings of the query data
+    """
     mat = np.vstack([X,Y])
     L1 = len(X)
     if normalization:
         mat = preprocessing.scale(mat)
     model = PCA(n_components=n_components)
     pca_fit = model.fit_transform(mat)
-    return pca_fit[0:L1,:],pca_fit[L1:,:]
+    W1 = pca_fit[0:L1,:]
+    W2 = pca_fit[L1:,:]
+    return W1, W2
 
 from sklearn.decomposition import KernelPCA
 def kpca_reduction(X, Y, n_components=20, kernel='cosine', normalization=True):
+    """Function used to perform dimension reduction based on kernelPCA.
+        Args:
+            X: Gene expression matrix of the reference batch
+            Y: Gene expression matrix of the query batch
+            n_components: The components we intend to preserve after dimension reduction
+            normalization: A bool value used to determine whether to scale the data or not
+        Output:
+            W1: Embeddings of the reference data
+            W2: Embeddings of the query data
+    """
     mat = np.vstack([X,Y])
     L1 = len(X)
     if normalization:
         mat = preprocessing.scale(mat)
     kpca = KernelPCA(n_components = n_components, kernel=kernel)
     kpca_fit = kpca.fit_transform(mat)
-    return kpca_fit[0:L1,:],kpca_fit[L1:,:]
+    W1 = kpca_fit[0:L1,:]
+    W2 = kpca_fit[L1:,:]
+    return W1, W2
 
+
+# features selection
 def top_features(X, Y, n_components=20, features_per_dim=10, normalization=True):
+    """Function used to select the top components after PCA dimension reduction
+        Args:
+            X: Gene expression matrix of the reference batch
+            Y: Gene expression matrix of the query batch
+            n_components: The components we intend to preserve after dimension reduction
+            features_pre_dim: The number of features being selected for differnet dimensions
+            normalization: A bool value used to determine whether to scale the data or not
+        Output:
+            top_features_index: The index array of top features
+
+    """
     mat = np.vstack([X,Y])
     if normalization:
         mat = preprocessing.scale(mat)
@@ -221,6 +304,17 @@ def top_features(X, Y, n_components=20, features_per_dim=10, normalization=True)
     return top_features_index
 
 def top_features_cca(X, Y, X_cca, Y_cca, n_components=20, features_per_dim=10, normalization=True):
+    """Function used to select the top components after CCA dimension reduction
+        Args:
+            X: Gene expression matrix of the reference batch
+            Y: Gene expression matrix of the query batch
+            n_components: The components we intend to preserve after dimension reduction
+            features_pre_dim: The number of features being selected for differnet dimensions
+            normalization: A bool value used to determine whether to scale the data or not
+        Output:
+            top_features_index: The index array of top features
+
+    """
     mat_cca = np.vstack([X_cca, Y_cca])
     if normalization:
         mat = np.vstack([preprocessing.scale(X),preprocessing.scale(Y)])
@@ -232,6 +326,22 @@ def top_features_cca(X, Y, X_cca, Y_cca, n_components=20, features_per_dim=10, n
 
 def filter_pairs(ref, query, pairs, k=200, n_components=20, features_per_dim=10, reduction='pca', 
                 ref_reduced=None, query_reduced=None):
+
+    """Function used to filter the rwMNN pairs we found
+        Args:
+            ref: Gene expression matrix of the reference batch 
+            query: Gene expression matrix of the query batch
+            pairs: rwMNN pairs we found
+            k: The number of nearest neighbors we used
+            n_components: The components we used to select top features
+            features_per_dim: The number of features being selected for differnet dimensions
+            reduction: The dimension reduction tool we used here. The options of this parameter include: 'pca' and 'cca'
+            ref_reduced: Dimension reduction results of the reference batch 
+            query_reduced: Dimension reduction results of the query batch 
+        Output:
+            pairs_filtered: rwMNN pairs after filtering
+
+    """
     ref_index = [x for x,y in pairs]
     query_index = [y for x,y in pairs]
     if reduction == 'cca':
@@ -256,6 +366,8 @@ def filter_pairs(ref, query, pairs, k=200, n_components=20, features_per_dim=10,
     return pairs_filtered
 
 def create_pairs_dict(pairs):
+    """A simple function used to generate a dictionary for random walk selection based on MNN seeds.
+    """
     pairs_dict = {}
     for x,y in pairs:
         if x not in pairs_dict.keys():
@@ -265,6 +377,14 @@ def create_pairs_dict(pairs):
     return pairs_dict
 
 def acquire_rwmnn_pairs(X, Y, k):
+    """Function used to generate the MNN pairs (used for rwMNN pairs finding)
+        Args:
+            X: Embeddings of the reference data
+            Y: Embeddings of the query data
+            k: The number of nearest neighbors we chose
+        Output:
+             pairs: The MNN pairs we found
+    """
     X = preprocessing.normalize(X,axis=1)
     Y = preprocessing.normalize(Y,axis=1)
     t1 = KDTree(X)
@@ -283,7 +403,22 @@ def acquire_rwmnn_pairs(X, Y, k):
 
 def calculate_rwmnn_pairs(X, Y, ref_data, query_data, k1 = None, k2 = None, 
                           filtering = False, k_filter = 100, reduction = 'pca'):
+    """Function used to generate the random walk MNN pairs
+        Args:
+            X:  Gene expression matrix of the reference batch
+            Y:  Gene expression matrix of the query batch
+            ref_data: Dimension reduction results of the reference batch 
+            query_data: Dimension reduction results of the query batch 
+            k1: The number of nearest neighbors we used across different batches
+            k2: The number of nearest neighbors we used inner one batch
+            filtering: A bool value used to determine whether we used top features selection or not
+            k_filter: The number of nearest neighbors we used in the filter step
+            reduction = The dimension reduction tool we used here. The options of this parameter include: 'cca', 'pca' and 'kpca'
+        Output:
+            ref_index:  Partial rwMNN pairs index used for the reference dataset
+            query_index: Partial rwMNN pairs index used for the query dataset
 
+    """
     if k2 is None:
         k2 = max(int(min(len(ref_data), len(query_data))/100), 1)
     if k1 is None:
@@ -321,6 +456,21 @@ def calculate_rwmnn_pairs(X, Y, ref_data, query_data, k1 = None, k2 = None,
 
 def training_set_generator(ref, query, reduction=None, subsample=None,
                            k1=None, k2=None, norm=True, filtering=False):
+    """Function used to generate the training dataset
+        Args:
+            ref: Gene expression matrix of the reference batch
+            query: Gene expression matrix of the query batch
+            reduction: The dimension reduction tool we used here. The options of this parameter include: None (raw space), 'cca', 'pca' and 'kpca' 
+            subsample: The size of our data used to generate training dataset
+            k1: The number of nearest neighbors we used across different batches
+            k2: The number of nearest neighbors we used inner one batch
+            norm: A bool value used to determine whether we need to normalize the given dataset when searching for the pairs or not
+            filtering: A bool value used to determine whether we used top features selection or not
+        Output:
+            ref[ref_index]: The reference part of the training dataset
+            query[query_index]: The query part of the training dataset
+
+    """
     ref_reduced, query_reduced = None, None
     if subsample:
         len_ref = len(ref)
@@ -349,6 +499,14 @@ def training_set_generator(ref, query, reduction=None, subsample=None,
     return ref[ref_index], query[query_index]
 
 def order_selection(adata, key='batch', orders=None):
+    '''Function used to determine the training sequence based on the variance across genes.
+        Args:
+            adata: The given dataset in AnnData form
+            key: The index name of batch information in the given dataset
+            orders: The batch sequence for training or none
+        Output:
+            orders: The batch sequence for training
+    '''
     if orders == None:
         batch_list = list(set(adata.obs[key].values))
         adata_values = [np.array(adata.X[adata.obs[key] == batch]) for batch in batch_list]
@@ -359,6 +517,8 @@ def order_selection(adata, key='batch', orders=None):
         return orders
 
 def generate_target_dataset(adata, batch_list):
+    """A simple function used to rearrange the batch index of our given dataset.
+    """
     adata0 = adata[adata.obs['batch'] == batch_list[0]]
     for i in batch_list[1:]:
         adata0 = adata0.concatenate(adata[adata.obs['batch'] == i], batch_key='batch_key', index_unique=None)
@@ -367,7 +527,27 @@ def generate_target_dataset(adata, batch_list):
 def run_respan(adata, batch_key='batch', order=None, epoch=300, batch=1024, lambda_1=10., 
                reduction='pca', subsample=3000, k1=None, k2=None, filtering=False,
                n_critic=10, seed=999, b1=0.9, b2=0.999, lr=0.0001, opt='AdamW'):
-    
+    '''The main entry of our model
+        Args:
+            adata: Data with batch effect
+            batch_key:  The index name of batch information in the given dataset
+            order: The batch sequence for training or none
+            epoch: The number of iteraiton steps
+            batch: Input batch 
+            lambda_1: A hyperparameter used to control the weights of gradient penalty
+            reduction: Method we used for dimension reduction, including None, 'cca', 'pca' and 'kpca' 
+            subsample: The size of our data used to generate training dataset
+            k1: The number of nearest neighbors we used across different batches
+            k2: The number of nearest neighbors we used inner one batch
+            filtering: A bool value used to determine whether we used top features selection or not
+            n_critic: A step value used to determine the training times of generator 
+            seed: Random seed we used in our training process
+            b1,b2: Hyperparameters used in AdamW optimizer
+            lr: Learning rate
+            opt: The name of our optimizer
+        Output:
+            adata_new: Results after batch correction
+    '''
     # Set a seed
     random.seed(seed)
     np.random.seed(seed)
