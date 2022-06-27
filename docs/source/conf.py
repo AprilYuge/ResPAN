@@ -16,8 +16,8 @@
 
 
 # -- Project information -----------------------------------------------------
-# import sphinx_autodoc_typehints
-# import ResPAN
+import sphinx_autodoc_typehints
+import ResPAN
 
 project = 'ResPAN'
 copyright = '2022, Tianyu Liu'
@@ -53,17 +53,17 @@ source_suffix = '.rst'
 master_doc = 'index'
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-# html_show_sourcelink = True
-# set_type_checking_flag = True
-# typehints_fully_qualified = True
-# napoleon_use_rtype = False
-# autosummary_generate = True
-# autosummary_generate_overwrite = True
-# autodoc_preserve_defaults = True
-# autodoc_inherit_docstrings = True
-# autodoc_default_options = {
-#     'autosummary': True
-# }
+html_show_sourcelink = True
+set_type_checking_flag = True
+typehints_fully_qualified = True
+napoleon_use_rtype = False
+autosummary_generate = True
+autosummary_generate_overwrite = True
+autodoc_preserve_defaults = True
+autodoc_inherit_docstrings = True
+autodoc_default_options = {
+    'autosummary': True
+}
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -87,15 +87,15 @@ import sphinx_rtd_theme
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-# fa_orig = sphinx_autodoc_typehints.format_annotation
-# def format_annotation(annotation, fully_qualified=True):  # pylint: disable=unused-argument
-#     r"""
-#     Adapted from https://github.com/agronholm/sphinx-autodoc-typehints/issues/38#issuecomment-448517805
-#     """
-#     if inspect.isclass(annotation):
-#         full_name = f'{annotation.__module__}.{annotation.__qualname__}'
-#         override = qualname_overrides.get(full_name)
-#         if override is not None:
-#             return f':py:class:`~{override}`'
-#     return fa_orig(annotation)
-# sphinx_autodoc_typehints.format_annotation = format_annotation
+fa_orig = sphinx_autodoc_typehints.format_annotation
+def format_annotation(annotation, fully_qualified=True):  # pylint: disable=unused-argument
+    r"""
+    Adapted from https://github.com/agronholm/sphinx-autodoc-typehints/issues/38#issuecomment-448517805
+    """
+    if inspect.isclass(annotation):
+        full_name = f'{annotation.__module__}.{annotation.__qualname__}'
+        override = qualname_overrides.get(full_name)
+        if override is not None:
+            return f':py:class:`~{override}`'
+    return fa_orig(annotation)
+sphinx_autodoc_typehints.format_annotation = format_annotation
