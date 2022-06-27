@@ -2,8 +2,8 @@
 import scanpy as sc
 
 def data_preprocessing(adata):
-    '''Function used to preprocess our data with batch effect
-    '''
+    """Function used to preprocess our data with batch effect
+    """
     sc.pp.filter_cells(adata, min_genes=200)
     sc.pp.filter_genes(adata, min_cells=3)
     sc.pp.normalize_per_cell(adata, counts_per_cell_after=1e4)
