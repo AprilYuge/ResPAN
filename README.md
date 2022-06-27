@@ -91,6 +91,10 @@ sc.pl.umap(adata_new, color=['batch', 'celltype'], frameon=False, show=False)
 
 For the implementation of ResPAN, we referred to [WGAN-GP](https://github.com/Zeleni9/pytorch-wgan) for the structure of Generative Adversarial Network and [iMAP](https://github.com/Svvord/iMAP) for the random walk mutual nearest neighbor method. Many thanks to their open-source treasure.
 
+### API document
+
+For the API of our model, please refer this [link](https://respan.readthedocs.io/en/latest/API.html).
+
 ### Paper references
 [1] Wang, Dongfang, et al. "iMAP: integration of multiple single-cell datasets by adversarial paired transfer networks." Genome biology 22.1 (2021): 1-24.
 
