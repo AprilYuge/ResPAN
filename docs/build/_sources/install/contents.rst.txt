@@ -1,0 +1,5 @@
+Installation guide
+==================================
+
+To install our tool, please refer this link:
+pip install ResPAN
