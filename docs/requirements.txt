@@ -2,3 +2,5 @@ sphinx_autodoc_typehints
 ResPAN
 recommonmark
 sphinx_markdown_tables
+sphinx_copybutton
+nbsphinx
