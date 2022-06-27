@@ -1,6 +1,0 @@
-﻿ResPAN
-======
-
-.. currentmodule:: ResPAN
-
-.. automodule:: ResPAN
