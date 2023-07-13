@@ -1,4 +1,5 @@
 sphinx_autodoc_typehints
+scikit-learn
 ResPAN
 recommonmark
 sphinx_markdown_tables
