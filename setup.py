@@ -19,7 +19,7 @@ setuptools.setup(
     'pandas',
     'scipy',
     'torch',
-    'sklearn',
+    'scikit-learn',
     'scanpy'
     ],
     packages=['ResPAN'],
